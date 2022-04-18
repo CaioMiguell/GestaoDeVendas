@@ -45,7 +45,7 @@ public class GestaoVendasExecptionHandler extends ResponseEntityExceptionHandler
             return fildError.getDefaultMessage().concat(" e obrigatorio ");
         }
         if (fildError.getCode().equals(CONSTANT_VALIDATION_LENGTH)) {
-            return fildError.getDefaultMessage().concat(String.format(" deve ter entree %s e %s caracterres. "
+            return fildError.getDefaultMessage().concat(String.format(" deve ter entre %s e %s caracterres. "
                     , fildError.getArguments()[2], fildError.getArguments()[1]));
         }
         return fildError.toString();
