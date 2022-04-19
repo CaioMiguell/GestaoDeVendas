@@ -48,4 +48,11 @@ public class CategoriaControlador {
         return ResponseEntity.ok(categoriaServico.atualizar(codigo, categoria));
     }
 
+    @ApiOperation(value = "Deletar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{codigo}")
+    public void delete(@PathVariable Long codigo) {
+        categoriaServico.deletar(codigo);
+    }
+
 }
