@@ -35,14 +35,14 @@ public class CategoriaControlador {
         return categoria.isPresent() ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
     }
 
-    @ApiOperation(value = "Salvar", nickname = "salvar")
+    @ApiOperation(value = "Salvar", nickname = "salvarCategoria")
     @PostMapping
     public ResponseEntity<Categoria> salvar(@Valid @RequestBody Categoria categoria) {
         Categoria categoriaSalva = categoriaServico.salvar(categoria);
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
     }
 
-    @ApiOperation(value = "Atualizar", nickname = "atualizar")
+    @ApiOperation(value = "Atualizar", nickname = "atualizarCategoria")
     @PutMapping("/{codigo}")
     public ResponseEntity<Categoria> atualizar(@Valid @PathVariable Long codigo, @RequestBody Categoria categoria) {
         return ResponseEntity.ok(categoriaServico.atualizar(codigo, categoria));

@@ -1,5 +1,6 @@
 package com.gvendas.gestaovendas.exececao;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.List;
 public class GestaoVendasExecptionHandler extends ResponseEntityExceptionHandler {
 
     private static final String CONSTANT_VALIDATION_NOT_BLANK = "NotBlank";
+    private static final String CONSTANT_VALIDATION_NOT_NULL = "NotNull";
     private static final String CONSTANT_VALIDATION_LENGTH = "Length";
 
 
@@ -34,10 +36,10 @@ public class GestaoVendasExecptionHandler extends ResponseEntityExceptionHandler
     @ExceptionHandler(EmptyResultDataAccessException.class)
     public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex,
                                                                        WebRequest request) {
-        String msgUsuario = "Recurso nao encontrado." ;
+        String msgUsuario = "Recurso nao encontrado.";
         String msgDesenvolvedor = ex.toString();
-        List<Erro> erros = Arrays.asList(new Erro(msgUsuario,msgDesenvolvedor));
-        return handleExceptionInternal(ex,erros,new HttpHeaders(),HttpStatus.NOT_FOUND,request);
+        List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
+        return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
 
     }
 
@@ -45,8 +47,8 @@ public class GestaoVendasExecptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<Object> handleRegraNegocioException(RegraNegocioException ex, WebRequest request) {
         String msgUsuario = ex.getMessage();
         String msgDesenvolvedor = ex.getMessage();
-        List<Erro> erros = Arrays.asList(new Erro(msgUsuario,msgDesenvolvedor));
-        return handleExceptionInternal(ex,erros,new HttpHeaders(),HttpStatus.BAD_REQUEST,request);
+        List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
+        return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     private List<Erro> gerarListaDeErros(BindingResult bindingResult) {
@@ -60,8 +62,21 @@ public class GestaoVendasExecptionHandler extends ResponseEntityExceptionHandler
 
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex,
+                                                                        WebRequest request) {
+        String msgUsuario = "Recurso nao encontrado.";
+        String msgDesenvolvedor = ex.toString();
+        List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
+        return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+
+    }
+
     private String tratarMensagemDeErroParaUsuario(FieldError fildError) {
         if (fildError.getCode().equals(CONSTANT_VALIDATION_NOT_BLANK)) {
+            return fildError.getDefaultMessage().concat(" e obrigatorio ");
+        }
+        if (fildError.getCode().equals(CONSTANT_VALIDATION_NOT_NULL)) {
             return fildError.getDefaultMessage().concat(" e obrigatorio ");
         }
         if (fildError.getCode().equals(CONSTANT_VALIDATION_LENGTH)) {
