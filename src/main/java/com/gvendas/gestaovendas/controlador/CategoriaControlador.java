@@ -1,5 +1,7 @@
 package com.gvendas.gestaovendas.controlador;
 
+import com.gvendas.gestaovendas.dto.categoria.CategoriaRequestDTO;
+import com.gvendas.gestaovendas.dto.categoria.CategoriaResponseDTO;
 import com.gvendas.gestaovendas.entidades.Categoria;
 import com.gvendas.gestaovendas.servico.CategoriaServico;
 import io.swagger.annotations.Api;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Api(tags = "Categoria")
 @RestController
@@ -23,29 +26,36 @@ public class CategoriaControlador {
 
     @ApiOperation(value = "Listar", nickname = "listarTodas")
     @GetMapping
-    public List<Categoria> listarTodas() {
-        return categoriaServico.listarTodas();
+    public List<CategoriaResponseDTO> listarTodas() {
+        return categoriaServico.listarTodas().stream()
+                .map(categoria -> CategoriaResponseDTO.converterParaCategoriaDTO(categoria))
+                .collect(Collectors.toList());
     }
 
     @ApiOperation(value = "Listar por codigo", nickname = "buscarPorId")
     @GetMapping("/{codigo}")
-    public ResponseEntity<Optional<Categoria>> buscarPorId(@PathVariable Long codigo) {
+    public ResponseEntity<CategoriaResponseDTO> buscarPorId(@PathVariable Long codigo) {
         Optional<Categoria> categoria = categoriaServico.buscarPorCodigo(codigo);
 
-        return categoria.isPresent() ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
+        return categoria.isPresent() ? ResponseEntity
+                .ok(CategoriaResponseDTO.converterParaCategoriaDTO(categoria.get()))
+                : ResponseEntity.notFound().build();
     }
 
     @ApiOperation(value = "Salvar", nickname = "salvarCategoria")
     @PostMapping
-    public ResponseEntity<Categoria> salvar(@Valid @RequestBody Categoria categoria) {
-        Categoria categoriaSalva = categoriaServico.salvar(categoria);
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
+    public ResponseEntity<CategoriaResponseDTO> salvar(@Valid @RequestBody CategoriaRequestDTO categoriaDto) {
+        Categoria categoriaSalva = categoriaServico.salvar(categoriaDto.converterParaEntidade());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CategoriaResponseDTO.converterParaCategoriaDTO(categoriaSalva));
     }
 
     @ApiOperation(value = "Atualizar", nickname = "atualizarCategoria")
     @PutMapping("/{codigo}")
-    public ResponseEntity<Categoria> atualizar(@Valid @PathVariable Long codigo, @RequestBody Categoria categoria) {
-        return ResponseEntity.ok(categoriaServico.atualizar(codigo, categoria));
+    public ResponseEntity<CategoriaResponseDTO> atualizar(@Valid @PathVariable Long codigo, 
+                                                          @RequestBody CategoriaRequestDTO categoriaDto) {
+        Categoria categoriaAtualizada = categoriaServico.atualizar(codigo, categoriaDto.converterParaEntidade(codigo));
+        return ResponseEntity.ok(CategoriaResponseDTO.converterParaCategoriaDTO(categoriaAtualizada));
     }
 
     @ApiOperation(value = "Deletar", nickname = "delete")
